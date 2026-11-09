@@ -1,84 +1,155 @@
-# 📦 Amazon Review Sentiment Analysis & NLP Pipeline
+# 📦 Amazon Review Sentiment Analysis & Rating Prediction NLP System
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Streamlit App](https://img.shields.io/badge/Streamlit-Interactive%20Web%20App-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3%2B-F7931E.svg?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
-[![NLTK](https://img.shields.io/badge/NLTK-NLP-green.svg)](https://www.nltk.org/)
+[![NLTK](https://img.shields.io/badge/NLTK-NLP%20Toolkit-green.svg)](https://www.nltk.org/)
+[![Plotly](https://img.shields.io/badge/Plotly-Interactive%20Charts-3F4F75.svg?logo=plotly&logoColor=white)](https://plotly.com/)
+[![CI](https://github.com/velagapudirushi/amazon-review-analysis/actions/workflows/ci.yml/badge.svg)](https://github.com/velagapudirushi/amazon-review-analysis/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An end-to-end Natural Language Processing (NLP) and Machine Learning system for analyzing **568,454 Amazon Fine Food Reviews** across **74,258 products**. The pipeline combines custom negation-preserving text normalization, 3-stage WordNet lemmatization, 50,000 unigram-bigram TF-IDF feature extraction, and class-balanced multi-class Logistic Regression to predict 1–5 star ratings and sentiment classifications, accompanied by an interactive **Streamlit web application**.
+> An end-to-end, production-ready Natural Language Processing (NLP) system and **interactive Streamlit web application** that classifies customer sentiment and predicts discrete **1-to-5 star ratings** from Amazon customer reviews. Trained and evaluated on the **568,454 Amazon Fine Food Reviews** dataset, achieving **77.8% weighted precision** and **73.2% accuracy** at sub-millisecond inference speed.
 
 ---
 
-## 🚀 Key Highlights & Benchmarks
-
-- **Dataset Scale**: **568,454 reviews** across **74,258 products** and **256K+ unique users**.
-- **Preprocessing Pipeline**: Strips HTML tags and URLs, removes punctuation/digits, preserves **16 sentiment-critical negation tokens**, and executes **3-stage WordNet lemmatization** (verbs, nouns, adjectives).
-- **Severe Class Imbalance Handled**: Discovered a **78.1% positive rating skew** (4–5 stars) in the dataset; solved via cost-sensitive learning (`class_weight='balanced'`).
-- **Model Performance**:
-  - **77.8%** Weighted Precision
-  - **73.2%** Multi-Class Accuracy
-  - Sub-millisecond real-time inference latency.
-- **Interactive Application**: Full-featured **Streamlit web dashboard** with real-time star prediction, token-level TF-IDF interpretability, batch file processing, and interactive Plotly exploratory data analysis.
+## 📌 Table of Contents
+- [🎯 What is this Project About?](#-what-is-this-project-about)
+- [🖥️ Interactive Streamlit Web Application](#️-interactive-streamlit-web-application)
+  - [Tab 1: 🔮 Real-Time Review Predictor](#tab-1--real-time-review-predictor)
+  - [Tab 2: 📊 Exploratory Data Analysis & Insights](#tab-2--exploratory-data-analysis--insights)
+  - [Tab 3: 📁 Batch Processing & CSV Export](#tab-3--batch-processing--csv-export)
+  - [Tab 4: 🧠 Model Architecture & Technical Specs](#tab-4--model-architecture--technical-specs)
+- [📈 Key Benchmark Results](#-key-benchmark-results)
+- [💡 Data Discoveries & Consumer Behavior Insights](#-data-discoveries--consumer-behavior-insights)
+- [⚙️ Technical Pipeline & Methodology](#️-technical-pipeline--methodology)
+  - [1. Domain-Specific Text Normalization & Negation Preservation](#1-domain-specific-text-normalization--negation-preservation)
+  - [2. Multi-POS WordNet Lemmatization](#2-multi-pos-wordnet-lemmatization)
+  - [3. TF-IDF Unigram-Bigram Feature Space](#3-tfidf-unigram-bigram-feature-space)
+  - [4. Cost-Sensitive Class Balancing](#4-cost-sensitive-class-balancing)
+- [⚖️ Advantages & Alternatives Analysis](#️-advantages--alternatives-analysis)
+- [📂 Project Directory Structure](#-project-directory-structure)
+- [🚀 Quickstart & Installation](#-quickstart--installation)
+- [🏋️ CLI Model Training](#️-cli-model-training)
+- [🧪 Running Unit Tests](#-running-unit-tests)
+- [👤 Author & Contact](#-author--contact)
 
 ---
 
-## 🏛️ System Architecture
+## 🎯 What is this Project About?
+
+### The Business Challenge
+In modern e-commerce, customer reviews are the lifeblood of product success, conversion rates, and brand reputation. However, manually reading millions of unstructured reviews is impossible, and raw star ratings alone often fail to capture nuance:
+- Customers often leave a 3-star review with highly negative complaints.
+- Others leave glowing textual praise but mistakenly click 1 star.
+- Review datasets exhibit **extreme class imbalance** (over 78% positive reviews), causing naive machine learning models to ignore dissatisfied customers entirely.
+
+### The Solution
+This project builds an automated, robust NLP and Machine Learning pipeline that bridges raw consumer language and quantitative sentiment metrics. It transforms unstructured review text into:
+1. **Discrete 1–5 Star Rating Predictions**: Accurately classifying rating intent across all five tiers.
+2. **Sentiment Category Badges**: Positive (4–5 stars), Neutral (3 stars), or Negative (1–2 stars).
+3. **Glass-Box Interpretability**: Extracting token-level feature weights so users can immediately see *which words triggered the classification*.
+4. **Interactive Dashboard**: A full-featured **Streamlit web application** designed for business analysts, customer support leads, and data science teams to perform real-time and batch review audits.
+
+---
+
+## 🖥️ Interactive Streamlit Web Application
+
+The project includes an **enterprise-grade, interactive Streamlit web dashboard (`app.py`)** designed with Amazon-inspired aesthetics (palette of `#232F3E` dark slate and `#FF9900` orange accents).
 
 ```
-                                  [ Raw Amazon Review ]
-                                            │
-                                            ▼
-                        ┌───────────────────────────────────────┐
-                        │        NLP Preprocessing Engine       │
-                        │  • HTML & URL Stripping               │
-                        │  • Lowercase & Non-Alpha Removal      │
-                        │  • Negation Stopwords Preserved (16)  │
-                        │  • 3-Stage WordNet Lemmatization      │
-                        └───────────────────┬───────────────────┘
-                                            │
-                                            ▼
-                        ┌───────────────────────────────────────┐
-                        │      TF-IDF N-Gram Vectorizer         │
-                        │  • 50,000 Unigram & Bigram Features   │
-                        │  • Sublinear Term-Frequency Scaling   │
-                        └───────────────────┬───────────────────┘
-                                            │
-                                            ▼
-                        ┌───────────────────────────────────────┐
-                        │      Balanced Logistic Classifier     │
-                        │  • 5-Class Multi-Class Formulation    │
-                        │  • Class-Weighted Loss Balancing      │
-                        │  • Stratified 80/20 Train-Test Split  │
-                        └───────────────────┬───────────────────┘
-                                            │
-                    ┌───────────────────────┴───────────────────────┐
-                    ▼                                               ▼
-       [ Star Rating: 1 to 5 ⭐ ]                     [ Sentiment: Pos / Neu / Neg ]
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│  📦 Amazon Review Sentiment Analysis                                                   │
+│  Classify customer sentiment, predict 1-5 star ratings, and uncover key satisfaction   │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  [🔮 Real-Time Predictor]  [📊 EDA Dashboard]  [📁 Batch Prediction]  [🧠 Architecture]  │
+│                                                                                        │
+│  ┌───────────────────────┐ ┌───────────────────────┐ ┌───────────────────────────────┐ │
+│  │ PREDICTED RATING      │ │ OVERALL SENTIMENT     │ │ MODEL CONFIDENCE              │ │
+│  │ 5 / 5 Stars           │ │ Positive              │ │ 91.4%                         │ │
+│  │ ⭐⭐⭐⭐⭐             │ │ POSITIVE CLASSIFIER │ │ Top Class Margin            │ │
+│  └───────────────────────┘ └───────────────────────┘ └───────────────────────────────┘ │
+│                                                                                        │
+│  ┌──────────────────────────────────────┐  ┌────────────────────────────────────────┐  │
+│  │ 📊 Class Probability Distribution    │  │ 🔍 Top N-Gram Feature Weights          │  │
+│  │ 5 Star: ██████████████████ 91.4%     │  │ • "exceptional"       +2.41            │  │
+│  │ 4 Star: ███ 6.2%                     │  │ • "rich aroma"         +1.85            │  │
+│  │ 1-3 Star: █ 2.4%                     │  │ • "zero bitterness"    +1.52            │  │
+│  └──────────────────────────────────────┘  └────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+### Tab 1: 🔮 Real-Time Review Predictor
+- **Interactive Review Input**: Paste or type custom review text, or click preset test buttons (`🌟 5-Star Coffee`, `❌ 1-Star Peanuts`, `⚠️ 3-Star Tea`, `🔍 Negation Test`).
+- **Real-Time Classification**: Instantaneous sub-millisecond prediction of the 1–5 star rating and sentiment classification.
+- **Probability Distribution Bar Chart**: Interactive Plotly visual showing the model's calibrated confidence across each rating tier.
+- **Token Weight Attribution**: Displays the exact TF-IDF n-grams from the review that drove the model's decision.
+- **Negation Inspector**: Diagnostic panel confirming which negation words were preserved and which standard stopwords were safely filtered.
+
+### Tab 2: 📊 Exploratory Data Analysis & Insights
+- **Interactive Plotly Visualizations**:
+  - Score distribution (counts and percentages).
+  - Donut chart of rating proportions.
+  - Review length histograms (word counts) and average review length by star rating.
+  - Helpfulness ratio boxplots across ratings.
+  - Side-by-side Top Words comparison (Positive vs. Negative reviews).
+- **Data Insights Callouts**: Embedded statistical insights explaining consumer behavior directly from the dataset.
+
+### Tab 3: 📁 Batch Processing & CSV Export
+- **File Upload**: Drag-and-drop any CSV or Excel file containing customer reviews.
+- **Column Selector**: Choose which column contains the review text.
+- **Batch Classification**: Automated vectorized inference across thousands of reviews with progress tracking.
+- **Interactive Filtering & Search**: Filter processed reviews by predicted star rating (1 to 5) or sentiment category (Positive, Neutral, Negative).
+- **One-Click CSV Export**: Download the enriched dataset containing original text, cleaned tokens, predicted star rating, and sentiment label.
+
+### Tab 4: 🧠 Model Architecture & Technical Specs
+- **End-to-End Flowchart**: Visual representation of the data transformation pipeline.
+- **Engineering Justification**: Detailed rationale for selecting TF-IDF + Balanced Logistic Regression over computationally heavy alternatives.
+- **Mathematical Formulations**: Inverse class frequency loss weighting and sublinear TF-IDF scaling.
+
 ---
 
-## 📊 Exploratory Data Analysis & Analytical Insights
+## 📈 Key Benchmark Results
 
-Statistical profiling of the Amazon Fine Food Reviews dataset revealed critical customer behavior patterns:
+Evaluated on the **568,454 Amazon Fine Food Reviews** benchmark using an **80/20 stratified train-test split**:
 
-| Metric / Dimension | Finding | Behavioral Insight |
-| :--- | :--- | :--- |
-| **Rating Skew** | **78.1%** rated 4 or 5 stars (~64% 5-star) | Customers are predominantly satisfied; satisfied buyers review at a 5:1 ratio over dissatisfied buyers. |
-| **Review Length Profile** | **~350,000** reviews are under 70 words | Short-form praise ("Great taste, fast shipping!") dominates positive feedback. |
-| **Mixed Opinion Length** | 2-star and 3-star reviews are longest | Conflicted buyers write longer paragraphs to articulate both positive and negative aspects. |
-| **Negation Prominence** | `"not"` is the #1 word in 1-star reviews | Negations like *"not good"*, *"not fresh"*, and *"never buy"* drive negative classification. |
-| **Helpfulness Ratio** | Median = 1.0 for 5-star reviews | Readers strongly agree on helpfulness of positive reviews; critical reviews exhibit higher variance. |
+| Evaluation Metric | Score | Industry Context |
+| :--- | :---: | :--- |
+| **Weighted Precision** | **77.8%** | Measures the reliability of positive, neutral, and negative assignments. |
+| **Multi-Class Accuracy** | **73.2%** | Exact star match across all 5 classes (1, 2, 3, 4, 5). |
+| **Weighted Recall** | **73.0%** | Balances detection of rare 1-star complaints against frequent 5-star praise. |
+| **Inference Latency** | **< 1.0 ms** | Over 1,500 reviews/sec per CPU core; 100x faster than BERT. |
+| **Memory Footprint** | **~8 MB** | Ultra-lightweight artifact; runs on any standard server or micro-container. |
 
 ---
 
-## 🧪 Model Methodology & Performance
+## 💡 Data Discoveries & Consumer Behavior Insights
 
-### 1. Negation Preservation Rationale
-Standard English stopword filters strip words like `not`, `no`, `never`, and `without`. In sentiment analysis, doing so destroys the semantic difference between *"good"* and *"not good"*. 
+Exploratory Data Analysis across **568,454 reviews**, **74,258 products**, and **256K+ users** revealed five defining behavioral patterns:
 
-Our custom preprocessor preserves **16 sentiment-critical tokens**:
+1. **Massive Positive Skew (78.1%)**:
+   - **64%** of all reviews award a 5-star rating.
+   - 4-star and 5-star reviews combined account for **78.1%** of the dataset.
+   - Satisfied buyers are **5 times more likely** to leave a review than dissatisfied buyers.
+2. **Review Length vs. Rating Paradox**:
+   - ~350,000 reviews are short-form praise under 70 words (e.g. *"Great flavor, arrived quickly"*).
+   - In contrast, **2-star and 3-star reviews are the longest on average**: dissatisfied or conflicted buyers spend significant time explaining both pros and cons.
+3. **Negation as the Primary Signal of Dissatisfaction**:
+   - In 5-star reviews, evaluative words dominate (`good`, `great`, `love`).
+   - In 1-star reviews, the negation word **`not` is the #1 most frequent word** (`not good`, `not recommend`, `not as described`, `never buy`).
+4. **Helpfulness Consensus**:
+   - 5-star reviews exhibit a median helpfulness ratio close to **1.0** (readers strongly agree).
+   - Lower ratings show wide interquartile spreads, showing community debate over critical reviews.
+5. **Product & User Concentration**:
+   - A single top product (`B007JFMH8M`) accumulated 625+ reviews, while the top user (`A3OXHLG6DIBRW8`) authored 448 reviews.
+
+---
+
+## ⚙️ Technical Pipeline & Methodology
+
+### 1. Domain-Specific Text Normalization & Negation Preservation
+Standard NLP pipelines eliminate all stopwords. However, removing `"not"` or `"never"` turns *"This coffee is not good"* into *"coffee good"*, inverting the sentiment.
+
+We engineered a custom stopword exclusion policy that retains **16 sentiment-critical tokens**:
 ```python
 PRESERVED_STOPWORDS = [
     "not", "no", "nor", "never", "none", "neither",
@@ -87,80 +158,74 @@ PRESERVED_STOPWORDS = [
 ]
 ```
 
-### 2. Multi-Class Balanced Logistic Regression
-Because 5-star reviews account for nearly two-thirds of the dataset, unweighted models achieve high naive accuracy by simply predicting 5 stars for everything, missing unhappy customers. Applying `class_weight='balanced'` penalizes misclassification inversely proportional to class frequency:
+### 2. Multi-POS WordNet Lemmatization
+Unlike simple stemming (which cuts word suffixes blindly, e.g., *"delicious"* $\rightarrow$ *"delici"*), our pipeline applies sequential morphological lemmatization across Verbs (`v`), Nouns (`n`), and Adjectives (`a`):
+$$\text{text} \xrightarrow{\text{POS: verb}} w_v \xrightarrow{\text{POS: noun}} w_n \xrightarrow{\text{POS: adj}} w_{\text{final}}$$
 
-$$\text{Weight}_c = \frac{N_{\text{total}}}{C \times N_c}$$
+### 3. TF-IDF Unigram-Bigram Feature Space
+We extract **50,000 features** spanning single words and word pairs (`ngram_range=(1, 2)`) with sublinear term-frequency scaling ($\text{tf} = 1 + \log(\text{tf})$):
+- Captures compound phrases: `"not good"`, `"never again"`, `"high quality"`, `"waste money"`.
 
-### 3. Evaluation Metrics (80/20 Stratified Split)
-
-| Metric | Score |
-| :--- | :--- |
-| **Weighted Precision** | **77.8%** |
-| **Multi-Class Accuracy** | **73.2%** |
-| **Weighted Recall** | **73.0%** |
-| **Feature Space** | 50,000 unigrams + bigrams |
-
----
-
-## 💻 Streamlit Web Application
-
-The application is structured into four intuitive modules:
-
-1. **🔮 Real-Time Predictor**:
-   - Type or paste any product review or choose from built-in sample reviews.
-   - Outputs predicted star rating (1–5 ⭐), sentiment category badge (Positive 🟢 / Neutral 🟡 / Negative 🔴), and confidence percentage.
-   - Interactive bar chart showing class probability distribution across all 5 star ratings.
-   - **Feature Weight Inspector**: Highlights top TF-IDF n-grams influencing the model's decision and shows preserved negation tokens.
-
-2. **📊 EDA & Insights Dashboard**:
-   - Interactive Plotly visualizations for star distribution, rating percentage shares, review length histograms, and rating vs. helpfulness boxplots.
-   - Top frequent words comparison chart (Positive vs. Negative reviews).
-
-3. **📁 Batch Prediction & Export**:
-   - Upload any CSV or Excel file containing customer reviews.
-   - Run batch sentiment and star inference with progress tracking.
-   - Filter predictions by sentiment or rating and export enriched results to CSV.
-
-4. **🧠 Model Architecture & Technical Specs**:
-   - Technical walkthrough of the preprocessing pipeline, TF-IDF feature space, and cost-sensitive balanced logistic formulation.
+### 4. Cost-Sensitive Class Balancing
+To counteract the 78.1% positive bias, the loss function penalizes errors inversely proportional to class frequencies:
+$$W_c = \frac{N_{\text{total}}}{C \times N_c}$$
+This forces the optimization algorithm (L-BFGS) to prioritize correct classification of rare 1-star and 2-star reviews.
 
 ---
 
-## 📂 Repository Structure
+## ⚖️ Advantages & Alternatives Analysis
+
+For a detailed comparative engineering study benchmarking this pipeline against **BERT**, **GPT-4o APIs**, **VADER**, and **LSTMs**, see our dedicated document:
+
+📄 **[Read the Full Engineering Analysis: ADVANTAGES_AND_ALTERNATIVES.md](ADVANTAGES_AND_ALTERNATIVES.md)**
+
+### Quick Comparison Matrix
+
+| Architecture | 5-Class Accuracy | Latency | Cost / 100K Reviews | Memory | Explainability |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **This Pipeline (TF-IDF + LR)** | **73.2%** | **< 1 ms** | **$0.00** | **~8 MB** | **Complete (Feature Weights)** |
+| **Fine-Tuned DistilBERT** | 79.5% | 40–120 ms | ~$8.00 (GPU) | ~260 MB | Low (Attention maps) |
+| **Commercial LLM (GPT-4o)** | 81.0% | 500–2,000 ms | ~$300.00 (API) | Cloud | Medium (Prompt output) |
+| **Rule-Based (VADER)** | 58.0% | 2–5 ms | $0.00 | < 1 MB | High (Dictionary) |
+
+---
+
+## 📂 Project Directory Structure
 
 ```
 amazon-review-analysis/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml               # GitHub Actions CI workflow
+│       └── ci.yml               # Automated GitHub Actions CI test suite
 ├── data/
-│   ├── sample_reviews.csv       # Benchmark sample dataset
-│   └── README.md                # Kaggle dataset setup instructions
+│   ├── sample_reviews.csv       # 20-review benchmark dataset across 1-5 stars
+│   └── README.md                # Guide to download & use full Kaggle dataset
 ├── models/
-│   ├── sentiment_pipeline.joblib # Serialized model & vectorizer
-│   └── README.md                # Model persistence details
+│   ├── sentiment_pipeline.joblib # Serialized model pipeline (~8 MB)
+│   └── README.md                # Model specifications
 ├── notebooks/
-│   └── amazon_review_analysis.ipynb # Original exploratory & modeling notebook
+│   └── amazon_review_analysis.ipynb # Original research & EDA notebook
 ├── src/
-│   ├── __init__.py              # Package initialization
+│   ├── __init__.py              # Package entry point
 │   ├── preprocessor.py          # Negation-preserving NLP cleaning & lemmatization
-│   ├── model.py                 # TF-IDF + Logistic Regression pipeline
+│   ├── model.py                 # Scikit-learn TF-IDF + Logistic pipeline
 │   ├── visualizer.py            # Plotly interactive chart generators
 │   └── utils.py                 # Sample data loader & helpers
 ├── tests/
 │   ├── __init__.py
-│   └── test_preprocessor.py     # Unit test suite
-├── app.py                       # Streamlit web application
+│   └── test_preprocessor.py     # Automated unit test suite
+├── app.py                       # Full-featured Streamlit Web Application
 ├── train.py                     # CLI training and evaluation script
-├── requirements.txt             # Python dependencies
-├── .gitignore                   # Version control ignore rules
+├── requirements.txt             # Locked Python dependencies
+├── .gitignore                   # Ignore rules for git
+├── LICENSE                      # MIT Open-Source License
+├── ADVANTAGES_AND_ALTERNATIVES.md # Comprehensive comparative analysis
 └── README.md                    # Project documentation
 ```
 
 ---
 
-## 🛠️ Installation & Getting Started
+## 🚀 Quickstart & Installation
 
 ### 1. Clone the Repository
 ```bash
@@ -168,7 +233,7 @@ git clone https://github.com/velagapudirushi/amazon-review-analysis.git
 cd amazon-review-analysis
 ```
 
-### 2. Create and Activate a Virtual Environment
+### 2. Set Up a Virtual Environment
 ```bash
 # macOS/Linux
 python3 -m venv venv
@@ -184,23 +249,23 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Run the Streamlit Application
+### 4. Launch the Streamlit Web Application
 ```bash
 streamlit run app.py
 ```
-Open your browser at `http://localhost:8501`.
+Your default browser will automatically open to `http://localhost:8501`.
 
 ---
 
-## 🏋️ Training the Model via CLI
+## 🏋️ CLI Model Training
 
-You can retrain the model on the sample dataset or on the full Kaggle `Reviews.csv`:
+The repository includes a ready-to-run CLI script `train.py` to retrain the pipeline on custom datasets:
 
 ```bash
-# Train on sample dataset
+# Train on the included benchmark sample dataset
 python train.py --data data/sample_reviews.csv --output models/sentiment_pipeline.joblib
 
-# Train on full Kaggle dataset
+# Train on the full Kaggle Reviews.csv dataset
 python train.py --data data/Reviews.csv --max-features 50000 --output models/sentiment_pipeline.joblib
 ```
 
@@ -208,7 +273,7 @@ python train.py --data data/Reviews.csv --max-features 50000 --output models/sen
 
 ## 🧪 Running Unit Tests
 
-Run the automated test suite using Python's built-in `unittest`:
+Execute the automated test suite to verify text preprocessing, negation retention, and model serialization:
 
 ```bash
 python3 -m unittest discover tests
@@ -216,7 +281,7 @@ python3 -m unittest discover tests
 
 ---
 
-## 👤 Author
+## 👤 Author & Contact
 
 **Velagapudi Rushi**
 - **Email**: [velagapudirushi@gmail.com](mailto:velagapudirushi@gmail.com)
